@@ -1,0 +1,3 @@
+theme = catppuccin-mocha
+cursor-style = bar
+cursor-style-blink = true

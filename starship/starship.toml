@@ -1,0 +1,128 @@
+# Starship Prompt Configuration
+# Adapted from https://github.com/ansidev/starship-primer
+# Colors: Catppuccin Mocha (https://github.com/catppuccin/catppuccin)
+# Modules: directory, git, docker, aws, azure, direnv, nodejs, python, memory_usage
+
+palette = "catppuccin_mocha"
+
+format = """
+[](fg:blue)\
+$directory\
+[](fg:blue bg:mauve)\
+$git_branch\
+[](fg:mauve bg:surface1)\
+$git_status\
+[](fg:surface1)\
+$fill\
+$docker_context\
+$aws\
+$azure\
+$direnv\
+$nodejs\
+$python\
+$memory_usage\
+$line_break\
+$character\
+"""
+
+add_newline = true
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+subtext0 = "#a6adc8"
+overlay2 = "#9399b2"
+overlay1 = "#7f849c"
+overlay0 = "#6c7086"
+surface2 = "#585b70"
+surface1 = "#45475a"
+surface0 = "#313244"
+base = "#1e1e2e"
+mantle = "#181825"
+crust = "#11111b"
+
+[fill]
+symbol = ' '
+
+[directory]
+truncation_length = 3
+style = "fg:crust bg:blue"
+format = "[ $path ]($style)"
+
+[git_branch]
+# Only show local branch name — omit $remote_name to avoid duplication
+# when local and remote branch names differ
+symbol = ""
+style = "fg:crust bg:mauve"
+format = '[ $symbol $branch ]($style)'
+
+[git_commit]
+commit_hash_length = 4
+tag_symbol = ' '
+style = "fg:text bg:surface1"
+format = '[ $hash$tag ]($style)'
+
+[git_status]
+style = "fg:text bg:surface1"
+format = '[ $all_status$ahead_behind ]($style)'
+ahead = '⇡${count}'
+behind = '⇣${count}'
+diverged = '⇕⇡${ahead_count}⇣${behind_count}'
+
+[docker_context]
+symbol = ""
+style = "fg:crust bg:sapphire"
+format = '[](fg:sapphire)[ $symbol $context ]($style)[](fg:sapphire) '
+
+[aws]
+symbol = ""
+style = "fg:crust bg:peach"
+format = '[](fg:peach)[ $symbol ($profile )(\($region\)) ]($style)[](fg:peach) '
+
+[azure]
+disabled = false
+symbol = "󰠅"
+style = "fg:crust bg:blue"
+format = '[](fg:blue)[ $symbol ($subscription) ]($style)[](fg:blue) '
+
+[direnv]
+disabled = false
+symbol = ""
+style = "fg:crust bg:yellow"
+format = '[](fg:yellow)[ $symbol $loaded/$allowed ]($style)[](fg:yellow) '
+
+[nodejs]
+symbol = ""
+style = "fg:crust bg:green"
+format = '[](fg:green)[ $symbol ($version) ]($style)[](fg:green) '
+
+[python]
+symbol = ""
+style = "fg:crust bg:yellow"
+format = '[](fg:yellow)[ $symbol ($version) ]($style)[](fg:yellow) '
+
+[memory_usage]
+disabled = false
+threshold = 75
+symbol = "󰍛"
+style = "fg:crust bg:red"
+format = '[](fg:red)[ $symbol $ram_pct ]($style)[](fg:red) '
+
+[character]
+format = " $symbol "
+success_symbol = '[➜](green)'
+error_symbol = '[➜](red)'
