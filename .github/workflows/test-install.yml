@@ -1,0 +1,56 @@
+name: test-install
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run install.sh (first run)
+        run: ./install.sh
+
+      - name: Re-run install.sh (idempotency check)
+        run: ./install.sh
+
+      - name: Verify symlinks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -L "$HOME/.zshrc"
+          test -L "$HOME/.config/starship.toml"
+          [[ "$(readlink "$HOME/.zshrc")" == "$GITHUB_WORKSPACE/zsh/.zshrc" ]]
+          [[ "$(readlink "$HOME/.config/starship.toml")" == "$GITHUB_WORKSPACE/starship/starship.toml" ]]
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            test -L "$HOME/.config/ghostty/config"
+          else
+            test ! -e "$HOME/.config/ghostty/config"
+          fi
+
+      - name: Verify no duplicate backups created on re-run
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in "$HOME/.zshrc" "$HOME/.config/starship.toml"; do
+            count=$(find "$(dirname "$f")" -maxdepth 1 -name "$(basename "$f").bak.*" 2>/dev/null | wc -l | tr -d ' ')
+            if [[ "$count" -gt 1 ]]; then
+              echo "Duplicate backups for $f (count=$count)"
+              ls -la "$f".bak.* || true
+              exit 1
+            fi
+          done
+
+      - name: Smoke-test zsh + starship + plugins
+        shell: bash
+        run: |
+          set -euo pipefail
+          zsh -i -c 'echo "ZSH OK"; starship --version; type _zsh_autosuggest_start >/dev/null && echo "autosuggestions loaded" || echo "autosuggestions MISSING"'
