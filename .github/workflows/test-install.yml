@@ -28,8 +28,10 @@ jobs:
           set -euo pipefail
           test -L "$HOME/.zshrc"
           test -L "$HOME/.config/starship.toml"
+          test -L "$HOME/.justfile"
           [[ "$(readlink "$HOME/.zshrc")" == "$GITHUB_WORKSPACE/zsh/.zshrc" ]]
           [[ "$(readlink "$HOME/.config/starship.toml")" == "$GITHUB_WORKSPACE/starship/starship.toml" ]]
+          [[ "$(readlink "$HOME/.justfile")" == "$GITHUB_WORKSPACE/justfile" ]]
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             test -L "$HOME/.config/ghostty/config"
           else
@@ -40,7 +42,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in "$HOME/.zshrc" "$HOME/.config/starship.toml"; do
+          for f in "$HOME/.zshrc" "$HOME/.config/starship.toml" "$HOME/.justfile"; do
             count=$(find "$(dirname "$f")" -maxdepth 1 -name "$(basename "$f").bak.*" 2>/dev/null | wc -l | tr -d ' ')
             if [[ "$count" -gt 1 ]]; then
               echo "Duplicate backups for $f (count=$count)"
@@ -49,8 +51,38 @@ jobs:
             fi
           done
 
-      - name: Smoke-test zsh + starship + plugins
+      - name: Verify new tools are installed
         shell: bash
         run: |
           set -euo pipefail
-          zsh -i -c 'echo "ZSH OK"; starship --version; type _zsh_autosuggest_start >/dev/null && echo "autosuggestions loaded" || echo "autosuggestions MISSING"'
+          # zoxide installer drops binary in ~/.local/bin on linux, brew prefix on macOS
+          export PATH="$HOME/.local/bin:$PATH"
+          command -v zoxide
+          command -v fzf
+          command -v just
+          zoxide --version
+          fzf --version
+          just --version
+
+      - name: Smoke-test zsh + starship + plugins + zoxide + fzf
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          zsh -i -c '
+            echo "ZSH OK"
+            starship --version
+            type _zsh_autosuggest_start >/dev/null && echo "autosuggestions loaded" || { echo "autosuggestions MISSING"; exit 1; }
+            type __zoxide_z >/dev/null         && echo "zoxide loaded"          || { echo "zoxide MISSING"; exit 1; }
+            type fzf-history-widget >/dev/null && echo "fzf bindings loaded"    || { echo "fzf bindings MISSING"; exit 1; }
+          '
+
+      - name: Verify just dozzle recipe is discoverable
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          # Run from $HOME so there's no local justfile — should fall back to ~/.justfile
+          # (we can't rely on the zsh wrapper here; invoke just directly with --justfile)
+          cd "$HOME"
+          just --justfile "$HOME/.justfile" --list | grep -E '\bdozzle\b'

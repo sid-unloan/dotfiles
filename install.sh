@@ -47,7 +47,7 @@ if [[ "$OS" == "macos" ]]; then
   fi
 
   echo "==> Installing Homebrew packages..."
-  for pkg in starship zsh-autosuggestions zsh-completions zsh-syntax-highlighting zsh-you-should-use; do
+  for pkg in starship zsh-autosuggestions zsh-completions zsh-syntax-highlighting zsh-you-should-use zoxide fzf just; do
     if brew list --formula "$pkg" &>/dev/null; then
       echo "    $pkg already installed"
     else
@@ -69,7 +69,16 @@ elif [[ "$OS" == "linux" ]]; then
   sudo_if_needed apt-get update -qq
   sudo_if_needed apt-get install -y --no-install-recommends \
     zsh git curl ca-certificates \
-    zsh-autosuggestions zsh-syntax-highlighting
+    zsh-autosuggestions zsh-syntax-highlighting \
+    fzf
+
+  # zoxide isn't packaged in older ubuntu releases — use the official installer (idempotent)
+  if ! command -v zoxide &>/dev/null; then
+    echo "==> Installing zoxide..."
+    curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+  else
+    echo "    zoxide already installed"
+  fi
 
   # zsh-completions and you-should-use aren't in apt — clone them
   echo "==> Cloning extra zsh plugins..."
@@ -83,6 +92,15 @@ elif [[ "$OS" == "linux" ]]; then
     curl -fsSL https://starship.rs/install.sh | sudo_if_needed sh -s -- -y
   else
     echo "    starship already installed"
+  fi
+
+  if ! command -v just &>/dev/null; then
+    echo "==> Installing just..."
+    mkdir -p "$HOME/.local/bin"
+    curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh \
+      | bash -s -- --to "$HOME/.local/bin"
+  else
+    echo "    just already installed"
   fi
 fi
 
@@ -107,6 +125,7 @@ link() {
 echo "==> Creating symlinks..."
 link "$DOTFILES_DIR/zsh/.zshrc"             "$HOME/.zshrc"
 link "$DOTFILES_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
+link "$DOTFILES_DIR/justfile"               "$HOME/.justfile"
 
 # Ghostty is macOS-only — skip on Linux
 if [[ "$OS" == "macos" ]]; then

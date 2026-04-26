@@ -9,6 +9,9 @@ Terminal configuration for **macOS** and **Linux (Ubuntu/Debian)** — Starship 
 | **Starship** | Powerline prompt with Catppuccin Mocha theme — git, AWS, Azure, Docker, direnv, Node.js, Python, memory usage |
 | **Ghostty** | Catppuccin Mocha theme, blinking bar cursor (macOS only — Ghostty is macOS-exclusive) |
 | **Zsh** | Lean config with autosuggestions, syntax highlighting, completions, you-should-use |
+| **zoxide** | Smarter `cd` — `cd <dir>` jumps to frecent matches |
+| **fzf** | Fuzzy finder — `Ctrl-R` history, `Ctrl-T` files, `Alt-C` cd |
+| **just + dozzle** | `just dozzle` from anywhere starts a [Dozzle](https://dozzle.dev) container at <http://localhost:8888> |
 
 ## Requirements
 
@@ -46,13 +49,26 @@ Put secrets and local environment variables in `~/.zshrc.local` — it's sourced
 
 `.github/workflows/test-install.yml` runs `install.sh` twice (idempotency check) on both `ubuntu-latest` and `macos-latest` GitHub-hosted runners on every push/PR, then verifies the symlinks and boots zsh + starship.
 
+## `just` recipes
+
+The repo's `justfile` is symlinked to `~/.justfile`. The zsh shell wrapper makes `just <recipe>` work from any directory: if there's no local `justfile` in the cwd or any ancestor, it falls back to `~/.justfile`.
+
+```bash
+just              # list recipes
+just dozzle       # start dozzle log viewer at http://localhost:8888
+just dozzle-stop  # stop it
+just dozzle-logs  # tail dozzle's container logs
+```
+
 ## Structure
 
 ```
 dotfiles/
 ├── install.sh
+├── justfile                            # personal just recipes (dozzle, ...)
 ├── zsh/.zshrc
 ├── starship/starship.toml
-├── ghostty/config           # macOS only
+├── ghostty/config                      # macOS only
+├── dozzle/docker-compose.yml           # `just dozzle` to run
 └── .github/workflows/test-install.yml
 ```
