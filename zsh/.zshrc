@@ -89,6 +89,47 @@ unset _brew_share _plugin_dirs _d
 # Prompt
 eval "$(starship init zsh)"
 
+# zoxide — smarter cd (`z <dir>`); aliased to `cd` for ergonomics
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init zsh --cmd cd)"
+fi
+
+# fzf — fuzzy finder; key bindings (Ctrl-R history, Ctrl-T files, Alt-C cd) + completions
+if command -v fzf &>/dev/null; then
+  # macOS (brew) ships shell integrations under $(brew --prefix)/opt/fzf/shell
+  # Linux apt ships them under /usr/share/doc/fzf/examples
+  for _fzf_dir in \
+    "${_brew_share_unset:-}" \
+    "$(command -v brew &>/dev/null && echo $(brew --prefix)/opt/fzf/shell)" \
+    /usr/share/doc/fzf/examples \
+    /usr/share/fzf
+  do
+    [[ -z "$_fzf_dir" || ! -d "$_fzf_dir" ]] && continue
+    [[ -r "$_fzf_dir/key-bindings.zsh" ]]    && source "$_fzf_dir/key-bindings.zsh"
+    [[ -r "$_fzf_dir/completion.zsh"  ]]    && source "$_fzf_dir/completion.zsh"
+    break
+  done
+  unset _fzf_dir
+fi
+
+# `just` — fall through to ~/.justfile (personal recipes like `just dozzle`)
+# when there's no justfile in the current dir or any ancestor.
+if command -v just &>/dev/null; then
+  just() {
+    local d="$PWD"
+    while [[ "$d" != "/" ]]; do
+      for f in justfile Justfile .justfile; do
+        if [[ -f "$d/$f" ]]; then
+          command just "$@"
+          return $?
+        fi
+      done
+      d="$(dirname "$d")"
+    done
+    command just --justfile "$HOME/.justfile" --working-directory "$PWD" "$@"
+  }
+fi
+
 # Force blinking bar cursor (DECSCUSR 5) — prevents starship/zsh from resetting to block
 _fix_cursor() { echo -ne '\e[5 q'; }
 precmd_functions+=(_fix_cursor)
