@@ -47,3 +47,9 @@ eval "$(starship init zsh)"
 # Force blinking bar cursor (DECSCUSR 5) — prevents starship/zsh from resetting to block
 _fix_cursor() { echo -ne '\e[5 q'; }
 precmd_functions+=(_fix_cursor)
+
+# fnm (Fast Node Manager) — replaces nvm; near-instant shell startup
+# Auto-switches Node version on cd into dirs with .nvmrc / .node-version
+if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --use-on-cd --shell zsh)"
+fi

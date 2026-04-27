@@ -9,6 +9,7 @@ Terminal configuration for macOS — Starship prompt, Ghostty/Cmux, and Zsh.
 | **Starship** | Powerline prompt with Catppuccin Mocha theme — git, AWS, Azure, Docker, direnv, Node.js, Python, memory usage |
 | **Ghostty** | Catppuccin Mocha theme, blinking bar cursor |
 | **Zsh** | Lean config with Homebrew plugins — autosuggestions, syntax highlighting, completions, you-should-use |
+| **fnm** | Fast Node Manager (replaces nvm) — near-instant shell startup, auto-switches via `.nvmrc` / `.node-version` on `cd` |
 
 ## Requirements
 
@@ -26,10 +27,12 @@ chmod +x install.sh
 ```
 
 The install script will:
-1. Install Homebrew packages (starship, zsh plugins)
+1. Install Homebrew packages (starship, fnm, zsh plugins)
 2. Back up existing configs (`.bak` suffix)
 3. Symlink configs from this repo
 4. Create `~/.zshrc.local` for machine-specific secrets (not tracked)
+
+> **Migrating from nvm?** Remove `nvm` lines from `~/.zprofile` / `~/.zshrc` and `rm -rf ~/.nvm`, then run `fnm install <version> && fnm default <version>`.
 
 ## Machine-specific config
 

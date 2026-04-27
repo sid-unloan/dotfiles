@@ -12,7 +12,7 @@ if ! command -v brew &>/dev/null; then
 fi
 
 echo "==> Installing Homebrew packages..."
-brew install starship \
+brew install starship fnm \
   zsh-autosuggestions \
   zsh-completions \
   zsh-syntax-highlighting \
